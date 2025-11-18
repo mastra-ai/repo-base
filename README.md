@@ -1,49 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Repo Base - Chat with a repo
 
-## Getting Started
+An intelligent chatbot that helps you understand and explore GitHub repositories through natural language conversations. Built with Next.js, Mastra AI, and powered by Google's Gemini 2.5 Flash.
 
-1. Create a `.env` file in the project root with the following variables:
-   DB_URL=postgresql://postgres:postgres@localhost:5432/repo_base
+## ✨ Features
 
-````
+- 🤖 **Intelligent Repository Analysis** - Ask questions about any public GitHub repository
+- 💬 **Multi-Thread Conversations** - Maintain separate conversation threads for different repositories
+- 🔍 **Deep Code Understanding** - Analyze repository structure, file contents, commits, issues, and pull requests
+- 💾 **Persistent Memory** - Conversations are saved and can be resumed anytime
+- ⚡ **Real-time Streaming** - Get responses as they're generated
 
-2. Start the PostgreSQL database:
+## 📋 Prerequisites
+
+- Node.js 20+ (recommended) or Bun
+- Docker and Docker Compose
+- A GitHub account (no token required for public repos)
+- A Google AI API key (for Gemini)
+
+## 🚀 Getting Started
+
+### 1. Install Dependencies
+
+```bash
+pnpm install
+# or
+npm install
+# or
+yarn install
+```
+
+### 2. Set Up Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+DB_URL=postgresql://postgres:postgres@localhost:5432/repo_base
+
+# Google AI API Key (get from https://aistudio.google.com/apikey)
+GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key_here
+
+# Optional: GitHub Personal Access Token (for higher rate limits)
+# GITHUB_TOKEN=your_github_token_here
+```
+
+### 3. Start PostgreSQL Database
 
 ```bash
 docker-compose up -d
-````
-
-### Development Server
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This will start a PostgreSQL 16 instance in a Docker container with persistent storage.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Run the Development Server
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm dev
+# or
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## 📖 Usage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Enter a Repository**: Type a GitHub repository in the format `owner/repo` (e.g., `facebook/react`)
+2. **Start Chatting**: Ask questions about the repository:
+   - "What is the project structure?"
+   - "How does authentication work?"
+   - "Show me the latest commits"
+   - "What are the open issues?"
+3. **Multiple Threads**: Create new conversation threads for the same repository or switch between different repositories
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🤖 AI Agent Capabilities
 
-## Deploy on Vercel
+The AI agent has access to the following tools:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **getFilePaths**: Retrieves the complete file structure of a repository
+- **getFileContent**: Fetches the content of specific files
+- **getRepositoryCommits**: Analyzes commit history and recent changes
+- **getRepositoryIssues**: Examines open and closed issues
+- **getRepositoryPullRequests**: Reviews pull requests and code changes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔗 Links
+
+- [Mastra Documentation](https://mastra.ai/docs)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Assistant UI](https://www.assistant-ui.com/)
