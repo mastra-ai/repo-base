@@ -75,8 +75,6 @@ export const validateRepositoryInput = actionClient
 
     const resourceId = (await cookies()).get("resourceId")?.value;
 
-    console.log(resourceId, '###');
-
     if (!resourceId) throw new Error("Could not create thread");
 
     const agent = ctx.mastra.getAgent('agent');
@@ -98,8 +96,6 @@ export const validateRepositoryInput = actionClient
         resourceId,
         metadata: { owner, repo },
       });
-
-      console.log(thread, '###');
 
       if (thread) {
         if (shouldRedirect) redirect(`/${owner}/${repo}/${thread?.id}`);

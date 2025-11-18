@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
   const { messages, owner, repo, threadId } = await req.json();
 
 
-  console.log(messages, owner, repo, threadId, '###');
   /**
    * Since we're manually creating threads, this ensures we generate a title from the first user message
    */
@@ -31,9 +30,6 @@ export async function POST(req: NextRequest) {
       const title = await agent.generateTitleFromUserMessage(
         { message: messages.filter((m: ThreadUserMessage) => m.role === "user")[0] as MessageInput, tracingContext: {} },
       );
-
-      console.log(title, '###');
-      console.log(thread, '###');
 
       await memory.saveThread({
         thread: {

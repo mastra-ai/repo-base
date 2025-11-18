@@ -12,9 +12,7 @@ export async function SuggestedRepo({
   let description: string | null = null;
 
   try {
-    console.log(owner, repo);
     const repoRes = await gh.rest.repos.get({ owner, repo });
-    console.log(repoRes);
     description = repoRes.data.description;
   } catch (error) {
     console.error(error);
