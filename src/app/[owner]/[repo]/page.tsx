@@ -8,6 +8,12 @@ export default async function Page({
 }: {
   params: Promise<{ owner: string; repo: string }>;
 }) {
+
+  const agent = mastra.getAgent('agent');
+  const memory = await agent.getMemory();
+
+  if (!memory) notFound();
+
   const [resourceId, { owner, repo }] = await Promise.all([
     (await cookies()).get("resourceId")?.value,
     await params,
@@ -15,7 +21,7 @@ export default async function Page({
 
   if (!resourceId) return <div>No cookie</div>; // should not happen
 
-  const resourceThreads = await mastra.memory?.getThreadsByResourceId({
+  const resourceThreads = await memory.getThreadsByResourceId({
     resourceId,
   });
 
@@ -30,7 +36,7 @@ export default async function Page({
   let threadId: string;
 
   if (!nextThread) {
-    const thread = await mastra.memory?.createThread({
+    const thread = await memory.createThread({
       resourceId,
       metadata: { owner, repo, nextThread: true },
     });

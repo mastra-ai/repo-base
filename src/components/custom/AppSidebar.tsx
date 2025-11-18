@@ -26,10 +26,15 @@ export const AppSidebar = async ({
 }) => {
   const resourceId = (await cookies()).get("resourceId")?.value;
 
+  const agent = mastra.getAgent("agent");
+  const memory = await agent.getMemory();
+
+  if (!memory) throw new Error("Mastra memory not set up");
+
   if (resourceId) {
     const grouped = Object.groupBy(
       (
-        (await mastra.memory?.getThreadsByResourceId({
+        (await memory.getThreadsByResourceId({
           resourceId,
         })) ?? []
       ).sort((a, b) => b.createdAt.getDate() - a.createdAt.getDate()),

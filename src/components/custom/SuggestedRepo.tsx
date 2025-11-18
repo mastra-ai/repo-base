@@ -1,4 +1,4 @@
-import { gh } from "@/lib/utils";
+import { gh } from "@/lib/octokit";
 import { CardDescription } from "../ui/card";
 import { SuggestedRepoButton } from "./SuggestedRepoButton";
 
@@ -12,9 +12,13 @@ export async function SuggestedRepo({
   let description: string | null = null;
 
   try {
+    console.log(owner, repo);
     const repoRes = await gh.rest.repos.get({ owner, repo });
+    console.log(repoRes);
     description = repoRes.data.description;
-  } catch {}
+  } catch (error) {
+    console.error(error);
+  }
 
   return (
     <SuggestedRepoButton owner={owner} repo={repo}>

@@ -1,4 +1,4 @@
-import { gh } from "@/lib/utils";
+import { gh } from "@/lib/octokit";
 import { Tool } from "@mastra/core/tools";
 import { z } from "zod";
 

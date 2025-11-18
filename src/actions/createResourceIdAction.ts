@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
@@ -10,7 +11,7 @@ export const createResourceId = actionClient
   .action(async () => {
     const cookieStore = await cookies();
 
-    cookieStore.set("resourceId", crypto.randomUUID());
+    cookieStore.set("resourceId", randomUUID());
 
     revalidatePath("/");
   });

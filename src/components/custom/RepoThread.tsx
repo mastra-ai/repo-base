@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { FC } from "react";
 import { MessageSquare, ArrowRight } from "lucide-react";
 
-import { gh } from "@/lib/utils";
+import { gh } from "@/lib/octokit";
 import { Button } from "../ui/button";
 import type { StorageThreadType } from "@mastra/core";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";

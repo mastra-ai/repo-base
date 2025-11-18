@@ -2,6 +2,19 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+1. Create a `.env` file in the project root with the following variables:
+   DB_URL=postgresql://postgres:postgres@localhost:5432/repo_base
+
+````
+
+2. Start the PostgreSQL database:
+
+```bash
+docker-compose up -d
+````
+
+### Development Server
+
 First, run the development server:
 
 ```bash

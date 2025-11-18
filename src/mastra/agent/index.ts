@@ -1,4 +1,3 @@
-import { google } from "@ai-sdk/google";
 import { Agent } from "@mastra/core/agent";
 
 import { memory } from "../memory";
@@ -12,9 +11,8 @@ import { getRepositoryPullRequests } from "../tools/getRepositoryPullRequests";
 export const agent = new Agent({
   name: "agent",
   instructions,
-  //@ts-expect-error incompatible logger types
   memory,
-  model: google("gemini-2.0-flash-001"),
+  model: "google/gemini-2.5-flash",
   tools: {
     getFilePaths,
     getFileContent,

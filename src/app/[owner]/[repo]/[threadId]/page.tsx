@@ -12,9 +12,14 @@ export default async function Page({
   const resourceId = (await cookies()).get("resourceId")?.value;
   const { threadId } = await params;
 
+  const agent = mastra.getAgent('agent');
+  const memory = await agent.getMemory();
+
+  if (!memory) notFound();
+
   const [queryResponse, thread] = await Promise.all([
-    mastra.memory?.query({ threadId }),
-    mastra.memory?.getThreadById({ threadId }),
+    memory.query({ threadId }),
+    memory.getThreadById({ threadId }),
   ]);
 
   if (!thread || !resourceId) notFound();

@@ -8,6 +8,7 @@ import { AssistantRuntimeProvider } from "@assistant-ui/react";
 
 import { Thread } from "@/components/assistant-ui/thread";
 import ToolUIWrapper from "@/components/assistant-ui/tool-ui";
+import { DefaultChatTransport } from "ai";
 
 interface AssistantProps {
   initialMessages: Array<
@@ -19,9 +20,11 @@ export const Assistant: FC<AssistantProps> = ({ initialMessages }) => {
   const { owner, repo, threadId } = useParams();
 
   const runtime = useChatRuntime({
-    api: `/api/chat`,
-    body: { owner, repo, threadId },
-    initialMessages,
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+      body: { owner, repo, threadId },
+    }),
+    messages: initialMessages as any || [],
   });
 
   return (

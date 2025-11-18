@@ -8,7 +8,12 @@ export async function POST(req: NextRequest) {
   const { owner, repo } = await req.json();
 
   const resourceId = (await cookies()).get("resourceId")!.value;
-  const resourceThreads = await mastra.memory?.getThreadsByResourceId({
+  const agent = mastra.getAgent("agent");
+  const memory = await agent.getMemory();
+
+  if (!memory) throw new Error("Mastra memory not set up");
+
+  const resourceThreads = await memory.getThreadsByResourceId({
     resourceId,
   });
 
@@ -18,7 +23,7 @@ export async function POST(req: NextRequest) {
   );
 
   if (!threads || threads.length === 0) {
-    const thread = await mastra.memory?.createThread({
+    const thread = await memory.createThread({
       resourceId,
       metadata: { owner, repo },
     });

@@ -13,7 +13,12 @@ export const createThread = actionClient
 
     if (!resourceId) throw new Error("Could not create thread");
 
-    const thread = await ctx.mastra.memory?.createThread({
+    const agent = ctx.mastra.getAgent('agent');
+    const memory = await agent.getMemory();
+
+    if (!memory) throw new Error("Could not get memory");
+
+    const thread = await memory.createThread({
       resourceId,
       metadata: { owner, repo },
     });
