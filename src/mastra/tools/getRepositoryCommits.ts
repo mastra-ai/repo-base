@@ -1,5 +1,6 @@
 import { gh } from "@/lib/octokit";
-import { Tool } from "@mastra/core/tools";
+import { withCache } from "@/lib/github-cache";
+import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
 const inputSchema = z.object({
@@ -61,16 +62,26 @@ const outputSchema = z.union([
     })
     .describe("The error/failed object"),
 ]);
-export const getRepositoryCommits = new Tool({
+export const getRepositoryCommits = createTool({
   id: "getRepositoryCommits",
-  description: "List commits for a repository with optional filtering",
+  description: "List recent commits for a repository (limited to 100 commits to prevent rate limiting)",
   inputSchema,
   outputSchema,
   execute: async ({ context }) => {
     const { repo, owner } = context;
 
     try {
-      const response = await gh.rest.repos.listCommits({ owner, repo });
+      // Cache commits for 5 minutes
+      const cacheKey = `commits:${owner}/${repo}`;
+      const response = await withCache(
+        cacheKey,
+        () => gh.rest.repos.listCommits({
+          owner,
+          repo,
+          per_page: 100,
+        }),
+        5 * 60 * 1000 // 5 minutes
+      );
 
       return {
         ok: true as const,

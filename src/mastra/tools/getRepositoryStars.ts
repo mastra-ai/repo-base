@@ -1,5 +1,6 @@
 import { gh } from "@/lib/octokit";
-import { Tool } from "@mastra/core/tools";
+import { withCache } from "@/lib/github-cache";
+import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
 const inputSchema = z.object({
@@ -9,21 +10,16 @@ const inputSchema = z.object({
   repo: z
     .string()
     .describe("The name of the repository. As react in facebook/react"),
-  interval: z
-    .enum(["daily", "weekly", "monthly"])
-    .default("monthly")
-    .describe("The interval for aggregating star counts"),
 });
 
 export type GetRepositoryStarsArgs = z.infer<typeof inputSchema>;
 
 const outputSchema = z.union([
-  z.array(
-    z.object({
-      date: z.string().describe("The date of the star count"),
-      starCount: z.number().int().describe("The number of stars on that date"),
-    }),
-  ),
+  z.object({
+    ok: z.literal(true),
+    starCount: z.number().int().describe("The current number of stars"),
+    createdAt: z.string().describe("When the repository was created"),
+  }),
   z.object({
     ok: z.literal(false),
     message: z.string().describe("Error message"),
@@ -32,86 +28,38 @@ const outputSchema = z.union([
 
 export type GetRepositoryStarsResults = z.infer<typeof outputSchema>;
 
-export const getRepositoryStars = new Tool({
-  id: "getRepositoryStarsOverTime",
-  description: "Get the number of stars for a repository over time.",
+export const getRepositoryStars = createTool({
+  id: "getRepositoryStars",
+  description: "Get the current number of stars for a repository. Returns star count and creation date.",
   inputSchema,
   outputSchema,
   execute: async ({ context }) => {
-    const { owner, repo, interval } = context;
+    const { owner, repo } = context;
 
     try {
-      const allStargazers = [];
-
-      const iterator = gh.paginate.iterator(
-        gh.rest.activity.listStargazersForRepo,
-        {
+      // Fetch repository info which gives us the current star count in a SINGLE API call
+      // Cache for 30 minutes since star counts don't change rapidly
+      const cacheKey = `repo:${owner}/${repo}`;
+      const repoInfo = await withCache(
+        cacheKey,
+        () => gh.rest.repos.get({
           owner,
           repo,
-          per_page: 100,
-          headers: {
-            accept: "application/vnd.github.v3.star+json",
-          },
-        },
-      );
-
-      for await (const { data } of iterator) {
-        for (const star of data) {
-          if (!star.starred_at) continue;
-          allStargazers.push(new Date(star.starred_at));
-        }
-      }
-
-      // Aggregate star counts by the specified interval
-      const aggregatedStars: { [date: string]: number } = {};
-
-      allStargazers.forEach((item) => {
-        let dateKey: string;
-
-        switch (interval) {
-          case "daily":
-            dateKey = item.toISOString().split("T")[0]; // YYYY-MM-DD
-            break;
-          case "weekly": {
-            // Calculate the start of the week (Sunday)
-            const dayOfWeek = item.getDay(); // 0 for Sunday, 1 for Monday, etc.
-            const startDate = new Date(item);
-            startDate.setDate(item.getDate() - dayOfWeek);
-            dateKey = startDate.toISOString().split("T")[0]; // YYYY-MM-DD of Sunday
-            break;
-          }
-          case "monthly":
-            dateKey = `${item.getFullYear()}-${String(
-              item.getMonth() + 1,
-            ).padStart(2, "0")}`; // YYYY-MM
-            break;
-          default:
-            dateKey = item.toISOString().split("T")[0];
-        }
-
-        aggregatedStars[dateKey] = (aggregatedStars[dateKey] || 0) + 1;
-      });
-
-      // Convert aggregated data to the output schema
-      const result = Object.entries(aggregatedStars).map(
-        ([date, starCount]) => ({
-          date,
-          starCount,
         }),
+        30 * 60 * 1000 // 30 minutes
       );
 
-      // Sort by date
-      result.sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-      );
-
-      return result;
+      return {
+        ok: true as const,
+        starCount: repoInfo.data.stargazers_count,
+        createdAt: repoInfo.data.created_at,
+      };
     } catch (error) {
-      console.error("Error fetching stargazers:", error);
+      console.error("Error fetching repository info:", error);
       return {
         ok: false as const,
         message:
-          error instanceof Error ? error.message : "Failed to fetch stargazers",
+          error instanceof Error ? error.message : "Failed to fetch repository info",
       };
     }
   },

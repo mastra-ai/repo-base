@@ -1,6 +1,15 @@
-import { gh } from "@/lib/octokit";
 import { CardDescription } from "../ui/card";
 import { SuggestedRepoButton } from "./SuggestedRepoButton";
+
+// Static descriptions for suggested repos - no need to fetch from GitHub API on every page load
+const REPO_DESCRIPTIONS: Record<string, string> = {
+  "mastra-ai/mastra": "A TypeScript framework for building AI applications and workflows",
+  "assistant-ui/assistant-ui": "React Components for AI Chat",
+  "vercel/next.js": "The React Framework for Production",
+  "facebook/react": "The library for web and native user interfaces",
+  "tailwindlabs/tailwindcss": "A utility-first CSS framework for rapid UI development",
+  "shadcn/ui": "Beautifully designed components that you can copy and paste into your apps",
+};
 
 export async function SuggestedRepo({
   owner,
@@ -9,14 +18,8 @@ export async function SuggestedRepo({
   owner: string;
   repo: string;
 }) {
-  let description: string | null = null;
-
-  try {
-    const repoRes = await gh.rest.repos.get({ owner, repo });
-    description = repoRes.data.description;
-  } catch (error) {
-    console.error(error);
-  }
+  const repoKey = `${owner}/${repo}`;
+  const description = REPO_DESCRIPTIONS[repoKey] || null;
 
   return (
     <SuggestedRepoButton owner={owner} repo={repo}>

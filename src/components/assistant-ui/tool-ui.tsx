@@ -17,8 +17,6 @@ import {
   GetRepositoryStarsArgs,
   GetRepositoryStarsResults,
 } from "@/mastra/tools/getRepositoryStars";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../ui/chart";
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Skeleton } from "../ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 
@@ -52,30 +50,30 @@ type GetRepositoryPullRequestsResult = z.infer<
 
 type ToolArgs =
   | {
-      toolName: "getFileContent";
-      displayName: "Get file content";
-      args: GetFileContentArgs;
-    }
+    toolName: "getFileContent";
+    displayName: "Get file content";
+    args: GetFileContentArgs;
+  }
   | {
-      toolName: "getFilePaths";
-      displayName: "Get files";
-      args: GetFilePathsArgs;
-    }
+    toolName: "getFilePaths";
+    displayName: "Get files";
+    args: GetFilePathsArgs;
+  }
   | {
-      toolName: "getRepositoryIssues";
-      displayName: "Get issues";
-      args: GetRepositoryIssuesArgs;
-    }
+    toolName: "getRepositoryIssues";
+    displayName: "Get issues";
+    args: GetRepositoryIssuesArgs;
+  }
   | {
-      toolName: "getRepositoryCommits";
-      displayName: "Get commits";
-      args: GetRepositoryCommitsArgs;
-    }
+    toolName: "getRepositoryCommits";
+    displayName: "Get commits";
+    args: GetRepositoryCommitsArgs;
+  }
   | {
-      toolName: "getRepositoryPullRequests";
-      displayName: "Get pull requests";
-      args: GetRepositoryPullRequestsArgs;
-    };
+    toolName: "getRepositoryPullRequests";
+    displayName: "Get pull requests";
+    args: GetRepositoryPullRequestsArgs;
+  };
 
 type ToolContainerProps = {
   status: ToolStatus;
@@ -471,52 +469,33 @@ const GetRepositoryStarsToolUI = makeAssistantToolUI<
 >({
   toolName: "getRepositoryStars",
   render: ({ args, status, result }) => {
-    const renderChart = () => (
-      <ChartContainer
-        config={{
-          starCount: {
-            label: "Star Count",
-            color: "var(--chart-1)",
-            icon: Star,
-          },
-        }}
-        className="min-h-[300px]"
-      >
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={Array.isArray(result) ? result : []}>
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value) =>
-                new Date(value).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })
-              }
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value) => `${value}`}
-            />
-            <Line type="natural" dataKey="starCount" strokeWidth={2} />
-            <ChartTooltip content={<ChartTooltipContent />} />
-          </LineChart>
-        </ResponsiveContainer>
-      </ChartContainer>
-    );
-
     const renderContent = () => {
       switch (status.type) {
         case "running":
-          return <Skeleton className="w-full h-[300px]" />;
+          return <Skeleton className="w-full h-20" />;
         case "complete":
-          return Array.isArray(result) && result.length > 0 ? (
-            renderChart()
-          ) : (
-            <p>No data available</p>
-          );
+          if (result && typeof result === "object" && "ok" in result && result.ok) {
+            return (
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <Star className="size-8 text-yellow-500 fill-yellow-500" />
+                    <div>
+                      <p className="text-3xl font-bold">{result.starCount.toLocaleString()}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Created: {new Date(result.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          }
+          return <p>No data available</p>;
         case "incomplete":
         case "requires-action":
           return (
@@ -535,14 +514,9 @@ const GetRepositoryStarsToolUI = makeAssistantToolUI<
 
     return (
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
-            Star Count for {args.owner}/{args.repo}
-          </h2>
-          <span className="text-sm text-muted-foreground">
-            Interval: {args.interval}
-          </span>
-        </div>
+        <h2 className="text-xl font-semibold">
+          Star Count for {args.owner}/{args.repo}
+        </h2>
         {renderContent()}
       </div>
     );

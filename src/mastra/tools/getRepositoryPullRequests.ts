@@ -1,5 +1,6 @@
 import { gh } from "@/lib/octokit";
-import { Tool } from "@mastra/core/tools";
+import { withCache } from "@/lib/github-cache";
+import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
 const inputSchema = z.object({
@@ -21,9 +22,9 @@ const inputSchema = z.object({
   perPage: z
     .number()
     .int()
-    .max(100)
+    .max(50)
     .default(30)
-    .describe("The number of results per page (max 100)."),
+    .describe("The number of results per page (max 50, limited to prevent rate limiting)."),
 });
 
 const outputSchema = z.union([
@@ -55,7 +56,7 @@ const outputSchema = z.union([
   }),
 ]);
 
-export const getRepositoryPullRequests = new Tool({
+export const getRepositoryPullRequests = createTool({
   id: "getRepositoryPullRequests",
   description: "Get pull requests for a repository",
   inputSchema,
@@ -64,13 +65,19 @@ export const getRepositoryPullRequests = new Tool({
     const { owner, page, perPage: per_page, repo, state } = context;
 
     try {
-      const response = await gh.rest.pulls.list({
-        owner,
-        repo,
-        state,
-        page,
-        per_page,
-      });
+      // Cache pull requests for 3 minutes
+      const cacheKey = `pulls:${owner}/${repo}:${state}:${page}`;
+      const response = await withCache(
+        cacheKey,
+        () => gh.rest.pulls.list({
+          owner,
+          repo,
+          state,
+          page,
+          per_page,
+        }),
+        3 * 60 * 1000 // 3 minutes
+      );
 
       const pullRequests = response.data.map((r) => ({
         body: r.body ?? null,

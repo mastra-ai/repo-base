@@ -1,5 +1,6 @@
 import { gh } from "@/lib/octokit";
-import { Tool } from "@mastra/core/tools";
+import { withCache } from "@/lib/github-cache";
+import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
 const inputSchema = z.object({
@@ -33,9 +34,9 @@ const inputSchema = z.object({
   perPage: z
     .number()
     .int()
-    .max(100)
+    .max(50)
     .default(30)
-    .describe("The number of results per page (max 100)"),
+    .describe("The number of results per page (max 50, limited to prevent rate limiting)"),
 });
 
 const outputSchema = z.union([
@@ -103,7 +104,7 @@ const outputSchema = z.union([
   }),
 ]);
 
-export const getRepositoryIssues = new Tool({
+export const getRepositoryIssues = createTool({
   id: "getRepositoryIssues",
   description: "Get issues (excluding pull requests) for a repository",
   inputSchema,
@@ -121,16 +122,22 @@ export const getRepositoryIssues = new Tool({
     } = context;
 
     try {
-      const response = await gh.rest.issues.listForRepo({
-        owner,
-        repo,
-        state,
-        labels: labels?.join(","),
-        assignee,
-        creator,
-        page,
-        per_page,
-      });
+      // Cache issues for 3 minutes
+      const cacheKey = `issues:${owner}/${repo}:${state}:${page}:${labels?.join(",")}:${assignee}:${creator}`;
+      const response = await withCache(
+        cacheKey,
+        () => gh.rest.issues.listForRepo({
+          owner,
+          repo,
+          state,
+          labels: labels?.join(","),
+          assignee,
+          creator,
+          page,
+          per_page,
+        }),
+        3 * 60 * 1000 // 3 minutes
+      );
 
       // Filter out pull requests and map the response to match our schema
       const issues = response.data

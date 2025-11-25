@@ -7,6 +7,7 @@ import { getFileContent } from "../tools/getFileContent";
 import { getRepositoryIssues } from "../tools/getRepositoryIssues";
 import { getRepositoryCommits } from "../tools/getRepositoryCommits";
 import { getRepositoryPullRequests } from "../tools/getRepositoryPullRequests";
+import { getRepositoryStars } from "../tools/getRepositoryStars";
 
 export const agent = new Agent({
   name: "agent",
@@ -19,5 +20,6 @@ export const agent = new Agent({
     getRepositoryIssues,
     getRepositoryCommits,
     getRepositoryPullRequests,
+    getRepositoryStars,
   },
 });

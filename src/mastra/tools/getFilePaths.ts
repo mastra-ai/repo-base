@@ -1,8 +1,9 @@
 import { gh } from "@/lib/octokit";
-import { Tool } from "@mastra/core/tools";
+import { withCache } from "@/lib/github-cache";
+import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
-export const getFilePaths = new Tool({
+export const getFilePaths = createTool({
   id: "getFilePaths",
   description: "Get all file paths from the GitHub repository",
   inputSchema: z.object({
@@ -21,12 +22,18 @@ export const getFilePaths = new Tool({
   execute: async ({ context }) => {
     const { owner, repo, tree_sha } = context;
 
-    const getTreeResponse = await gh.rest.git.getTree({
-      owner,
-      repo,
-      recursive: "true",
-      tree_sha,
-    });
+    // Cache file paths for 15 minutes since repo structure doesn't change often
+    const cacheKey = `tree:${owner}/${repo}:${tree_sha}`;
+    const getTreeResponse = await withCache(
+      cacheKey,
+      () => gh.rest.git.getTree({
+        owner,
+        repo,
+        recursive: "true",
+        tree_sha,
+      }),
+      15 * 60 * 1000 // 15 minutes
+    );
 
     return getTreeResponse.data.tree
       .map((file) => file.path)

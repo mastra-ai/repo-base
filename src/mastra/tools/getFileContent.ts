@@ -1,5 +1,6 @@
 import { gh } from "@/lib/octokit";
-import { Tool } from "@mastra/core/tools";
+import { withCache } from "@/lib/github-cache";
+import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
 const inputSchema = z.object({
@@ -29,7 +30,7 @@ const outputSchema = z.union([
     .describe("The error/failed object"),
 ]);
 
-export const getFileContent = new Tool({
+export const getFileContent = createTool({
   id: "fetchFileContent",
   description:
     "Fetch file content from GitHub, decode it, and update the database",
@@ -39,11 +40,17 @@ export const getFileContent = new Tool({
     const { owner, path, repo } = context;
 
     try {
-      const response = await gh.rest.repos.getContent({
-        owner,
-        repo,
-        path,
-      });
+      // Cache file content for 10 minutes to reduce API calls
+      const cacheKey = `file:${owner}/${repo}:${path}`;
+      const response = await withCache(
+        cacheKey,
+        () => gh.rest.repos.getContent({
+          owner,
+          repo,
+          path,
+        }),
+        10 * 60 * 1000 // 10 minutes
+      );
 
       if (Array.isArray(response.data)) {
         return {
