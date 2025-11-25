@@ -34,18 +34,16 @@ export const listThreadsOrCreateNewThread = actionClient
     );
 
     if (!threads || threads.length === 0) {
-
-      try {
-        const thread = await memory.createThread({
-          resourceId,
-          metadata: { owner, repo },
-        });
-        redirect(`/${owner}/${repo}/${thread?.id}`);
-      } catch (error) {
-        console.error(error);
+      const thread = await memory.createThread({
+        resourceId,
+        metadata: { owner, repo },
+      });
+      
+      if (!thread?.id) {
         throw new Error("Could not create thread");
       }
-
+      
+      redirect(`/${owner}/${repo}/${thread.id}`);
     } else {
       redirect(`/${owner}/${repo}`);
     }

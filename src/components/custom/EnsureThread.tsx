@@ -42,8 +42,21 @@ export const EnsureThreadImpl: FC<
     };
   }, [checked, execute, isPending, owner, repo]);
 
-  if (!checked) return null;
-  return <>{children}</>;
+  return (
+    <>
+      {/* Always render children to maintain consistent hook calls */}
+      <div style={{ display: checked ? 'contents' : 'none' }}>
+        {children}
+      </div>
+      
+      {/* Loading state overlay */}
+      {!checked && (
+        <div className="h-dvh flex items-center justify-center">
+          <div className="text-muted-foreground">Loading thread...</div>
+        </div>
+      )}
+    </>
+  );
 };
 
 export const EnsureThread = memo(

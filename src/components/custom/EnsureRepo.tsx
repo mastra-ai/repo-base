@@ -22,16 +22,29 @@ export const EnsureRepo: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [execute, owner, repo, validated]);
 
-  if (hasErrored)
-    return (
-      <div className="h-dvh flex flex-col items-center justify-center">
-        <h1 className="font-semibold text-lg">Error retrieving repository</h1>
-        <Button variant="link">
-          <Link href="/">Go back home</Link>
-        </Button>
+  return (
+    <>
+      {/* Always render children to maintain consistent hook calls */}
+      <div style={{ display: validated && !hasErrored ? 'contents' : 'none' }}>
+        {children}
       </div>
-    );
-
-  if (!validated) return null;
-  return <>{children}</>;
+      
+      {/* Error state overlay */}
+      {hasErrored && (
+        <div className="h-dvh flex flex-col items-center justify-center">
+          <h1 className="font-semibold text-lg">Error retrieving repository</h1>
+          <Button variant="link">
+            <Link href="/">Go back home</Link>
+          </Button>
+        </div>
+      )}
+      
+      {/* Loading state overlay */}
+      {!validated && !hasErrored && (
+        <div className="h-dvh flex items-center justify-center">
+          <div className="text-muted-foreground">Loading repository...</div>
+        </div>
+      )}
+    </>
+  );
 };

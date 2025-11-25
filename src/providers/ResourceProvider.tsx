@@ -9,16 +9,17 @@ import { createResourceId } from "@/actions/createResourceIdAction";
 const ResourceProvider: FC<
   PropsWithChildren<{ resourceId: string | undefined }>
 > = ({ children, resourceId }) => {
-  const { execute } = useAction(createResourceId);
+  const { execute, isPending } = useAction(createResourceId);
 
   useEffect(() => {
-    if (!resourceId) {
+    if (!resourceId && !isPending) {
       console.log("executing");
       execute();
     }
-  }, [execute, resourceId]);
+  }, [execute, resourceId, isPending]);
 
-  if (!resourceId) return null;
+  // Don't gate rendering - let pages handle resourceId checks
+  // This ensures consistent hook calls across renders
   return <>{children}</>;
 };
 
