@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      context: ./app
+      context: .
       dockerfile: Dockerfile
     container_name: repo-base-app
     environment:
@@ -9,9 +9,8 @@ services:
       - GOOGLE_GENERATIVE_AI_API_KEY=${GOOGLE_GENERATIVE_AI_API_KEY}
       - DB_SSL=${DB_SSL:-false} # Optional: set to "true" to enable SSL for DB connection
       - GITHUB_TOKEN=${GITHUB_TOKEN} # Optional: used to get higher rate limits when accessing GitHub API, if unset remove or comment out
-      # - GITHUB_TOKEN
     volumes:
-      - ./app:/app
+      - .:/app
       - /app/node_modules
     restart: unless-stopped
     ports:
