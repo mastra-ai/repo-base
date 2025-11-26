@@ -42,6 +42,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 The node module dependencies will be installed automatically on the first run.
 
+### Tips
+
+You can enable SSL for PostgreSQL database by setting `DB_SSL=true` in the `.env` file, else it will default to `false`.
+
 ## 📖 Usage
 
 1. **Enter a Repository**: Type a GitHub repository in the format `owner/repo` (e.g., `facebook/react`)
