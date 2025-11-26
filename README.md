@@ -19,17 +19,7 @@ An intelligent chatbot that helps you understand and explore GitHub repositories
 
 ## 🚀 Getting Started
 
-### 1. Install Dependencies
-
-```bash
-pnpm install
-# or
-npm install
-# or
-yarn install
-```
-
-### 2. Set Up Environment Variables
+### 1. Set Up Environment Variables
 
 Create a `.env` file in the project root:
 
@@ -41,14 +31,16 @@ GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key_here
 # GITHUB_TOKEN=your_github_token_here
 ```
 
-### 3. Start PostgreSQL Database and run the Development Server
+### 2. Start PostgreSQL Database and run the Development Server
 
 ```bash
 docker compose up
 ```
 
-This will start a PostgreSQL 16 instance in a Docker container with persistent storage.
+This will start a PostgreSQL 16 instance in a Docker container with persistent storage and run the development server with hot reloading.
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+The node module dependencies will be installed automatically on the first run.
 
 ## 📖 Usage
 
