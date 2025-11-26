@@ -1,6 +1,8 @@
 import { InputForm } from "@/components/custom/inputForm";
 import { SuggestedRepo } from "@/components/custom/SuggestedRepo";
 
+export const dynamic = "force-dynamic"; // Help with container build because github repos are not being called at build time
+
 export default function Page() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 w-full">
