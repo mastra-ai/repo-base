@@ -34,8 +34,6 @@ yarn install
 Create a `.env` file in the project root:
 
 ```env
-DB_URL=postgresql://postgres:postgres@localhost:5432/repo_base
-
 # Google AI API Key (get from https://aistudio.google.com/apikey)
 GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key_here
 
@@ -43,22 +41,13 @@ GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key_here
 # GITHUB_TOKEN=your_github_token_here
 ```
 
-### 3. Start PostgreSQL Database
+### 3. Start PostgreSQL Database and run the Development Server
 
 ```bash
-docker-compose up -d
+docker compose up
 ```
 
 This will start a PostgreSQL 16 instance in a Docker container with persistent storage.
-
-### 4. Run the Development Server
-
-```bash
-pnpm dev
-# or
-npm run dev
-```
-
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📖 Usage

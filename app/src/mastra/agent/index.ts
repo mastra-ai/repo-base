@@ -1,6 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 
-import { memory } from "../memory";
+import { getMemory } from "../memory";
 import { instructions } from "./instructions";
 import { getFilePaths } from "../tools/getFilePaths";
 import { getFileContent } from "../tools/getFileContent";
@@ -12,7 +12,7 @@ import { getRepositoryStars } from "../tools/getRepositoryStars";
 export const agent = new Agent({
   name: "agent",
   instructions,
-  memory,
+  memory: getMemory(),
   model: "google/gemini-2.5-flash",
   tools: {
     getFilePaths,

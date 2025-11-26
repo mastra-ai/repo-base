@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: repo-base-app
+    environment:
+      - DB_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@database:5432/${POSTGRES_DB:-repo_base}
+      - GOOGLE_GENERATIVE_AI_API_KEY=${GOOGLE_GENERATIVE_AI_API_KEY}
+      - DB_SSL=${DB_SSL:-false} # Optional: set to "true" to enable SSL for DB connection
+      - GITHUB_TOKEN=${GITHUB_TOKEN} # Optional: used to get higher rate limits when accessing GitHub API, if unset remove or comment out
+      # - GITHUB_TOKEN
+    volumes:
+      - ./app:/app
+      - /app/node_modules
+    restart: unless-stopped
+    ports:
+      - mode: ingress
+        target: 3000
+        published: 3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+    depends_on:
+      - database
+
+  database:
+    image: postgres:16
+    container_name: repo-base-database
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-repo_base}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - mode: host
+        target: 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
